@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freedom Fighters</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; background: #f0f2f5; padding: 20px; max-width: 600px; margin: 0 auto; }
+        .search { width: 100%; padding: 15px; font-size: 16px; border-radius: 12px; border: 1px solid #ddd; box-sizing: border-box; margin-bottom: 20px; }
+        .card { background: white; padding: 15px; margin-bottom: 10px; border-radius: 12px; display: flex; align-items: center; gap: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .card img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; background: #eee; }
+        .info { flex-grow: 1; }
+        .name { font-weight: bold; display: block; margin-bottom: 8px; font-size: 16px; text-transform: capitalize; }
+        .btn-container { display: flex; gap: 10px; }
+        button { border: none; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: white; }
+        .btn-us { background: #007AFF; }
+        .btn-uk { background: #FF3B30; }
+        #status { text-align: center; color: #666; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <input type="text" class="search" placeholder="Search fighters..." onkeyup="filter(this.value)">
+    <div id="status">Scanning your GitHub Vault...</div>
+    <div id="list"></div>
+    <audio id="player"></audio>
+
+<script>
+    const USER = "dogierez01";
+    const REPO = "freedom-fighters";
+    const BRANCH = "main";
+    
+    const API_URL = `https://api.github.com/repos/${USER}/${REPO}/contents/`;
+    const RAW_URL = `https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/`;
+
+    const list = document.getElementById("list");
+    const status = document.getElementById("status");
+    const player = document.getElementById("player");
+    let allFighters = [];
+
+    async function init() {
+        try {
+            const response = await fetch(API_URL);
+            if (!response.ok) throw new Error("Could not find files.");
+            const files = await response.json();
+
+            let fighters = {};
+            files.forEach(file => {
+                let nameParts = file.name.split(' ');
+                let baseName = nameParts.slice(0, 2).join(' ').replace('.wav','').replace('.mp3','').replace('.jpg','').trim();
+                
+                if (!fighters[baseName]) fighters[baseName] = { name: baseName, us: "", uk: "", img: "" };
+                
+                let lowerName = file.name.toLowerCase();
+                if (lowerName.includes("us") && (lowerName.includes("wav") || lowerName.includes("mp3"))) fighters[baseName].us = file.name;
+                else if (lowerName.includes("uk") && (lowerName.includes("wav") || lowerName.includes("mp3"))) fighters[baseName].uk = file.name;
+                else if (lowerName.includes("jpg") || lowerName.includes("png") || lowerName.includes("bio")) fighters[baseName].img = file.name;
+            });
+
+            allFighters = Object.values(fighters);
+            render(allFighters);
+            status.style.display = 'none';
+
+        } catch (error) {
+            status.innerHTML = "❌ Error: " + error.message;
+        }
+    }
+
+    function render(items) {
+        list.innerHTML = items.map(f => `
+            <div class="card">
+                <img src="${f.img ? RAW_URL + encodeURIComponent(f.img) : ''}" onerror="this.src='https://via.placeholder.com/60'">
+                <div class="info">
+                    <span class="name">${f.name}</span>
+                    <div class="btn-container">
+                        ${f.us ? `<button class="btn-us" onclick="play('${f.us}')">🇺🇸 US</button>` : ''}
+                        ${f.uk ? `<button class="btn-uk" onclick="play('${f.uk}')">🇬🇧 UK</button>` : ''}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    function play(filename) { 
+        player.src = RAW_URL + encodeURIComponent(filename); 
+        player.play(); 
+    }
+    
+    function filter(q) { render(allFighters.filter(f => f.name.toLowerCase().includes(q.toLowerCase()))); }
+    
+    init();
+</script>
+</body>
+</html>
