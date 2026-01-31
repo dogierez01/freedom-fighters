@@ -20,6 +20,9 @@
         #now-playing { color: #4dabf7; font-size: 13px; margin-bottom: 8px; font-weight: bold; text-align: center; }
         #player { width: 95%; height: 40px; outline: none; }
 
+        /* PUSH LIST DOWN SO PLAYER DOESN'T HIDE IT */
+        #list { margin-top: 20px; }
+
         .search { width: 100%; padding: 15px; font-size: 16px; border-radius: 12px; border: 1px solid #333; background: #1e1e1e; color: white; margin-bottom: 20px; }
         .card { background: #1e1e1e; padding: 15px; margin-bottom: 15px; border-radius: 12px; display: flex; align-items: center; gap: 15px; border: 1px solid #333; }
         
@@ -52,11 +55,6 @@
     <div id="audio-bar">
         <div id="now-playing">Select a track to play</div>
         <audio id="player" controls controlsList="nodownload"></audio>
-    </div>
-
-    <div style="text-align:center; margin-bottom: 20px;">
-        <p style="color: red; font-size: 12px;">DEBUG: Test Image Below</p>
-        <img src="cover.jpg" style="width: 100%; max-height: 200px; object-fit: contain; border: 2px solid red;" alt="IF YOU SEE THIS TEXT, IMAGE IS MISSING">
     </div>
 
     <input type="text" class="search" placeholder="Search fighters..." onkeyup="filter(this.value)">
