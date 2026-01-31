@@ -3,6 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <meta property="og:title" content="Freedom Fighters Audio">
+    <meta property="og:description" content="Listen to biographies of historical figures in US and UK English.">
+    <meta property="og:image" content="https://dogierez01.github.io/freedom-fighters/cover.jpg">
+    <meta property="og:url" content="https://dogierez01.github.io/freedom-fighters/">
+    <meta property="og:type" content="website">
+    
     <title>Freedom Fighters</title>
     <style>
         /* DARK MODE & LAYOUT */
@@ -81,14 +88,14 @@
                 let lower = file.name.toLowerCase();
                 if (lower.endsWith('.md') || lower.endsWith('.html') || lower.endsWith('.css') || lower.startsWith('.')) return;
 
-                // 1. SMART CLEANING: Strip "male", "female", "us", "uk" to find the PERSON
+                // 1. SMART CLEANING
                 let clean = lower
                     .replace(/\.[^/.]+$/, "") 
-                    .replace(/ bio| us| uk| female| male| english/gi, "") // Remove keywords
-                    .replace(/[0-9]/g, "") // Remove numbers
+                    .replace(/ bio| us| uk| female| male| english/gi, "") 
+                    .replace(/[0-9]/g, "") 
                     .trim();
 
-                let id = clean.replace(/[^a-z]/g, ""); // Create ID from name only
+                let id = clean.replace(/[^a-z]/g, ""); 
                 let displayName = clean.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
 
                 if (!fighters[id]) fighters[id] = { name: displayName, us: [], uk: [], general: [], img: "" };
@@ -130,7 +137,6 @@
         `).join('');
     }
 
-    // 3. SMART BUTTON LABELS based on filename
     function makeButton(filename, type) {
         let label = type === "us" ? "🇺🇸 US" : (type === "uk" ? "🇬🇧 UK" : "▶ Play");
         let lower = filename.toLowerCase();
