@@ -5,47 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Freedom Fighters</title>
     <style>
-        body { font-family: -apple-system, sans-serif; background: #f0f2f5; padding: 20px; max-width: 600px; margin: 0 auto; }
-        .search { width: 100%; padding: 15px; font-size: 16px; border-radius: 12px; border: 1px solid #ddd; box-sizing: border-box; margin-bottom: 20px; }
-        .card { background: white; padding: 15px; margin-bottom: 10px; border-radius: 12px; display: flex; align-items: center; gap: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        /* VISUAL CHECK: Dark Header means New Code is working */
+        body { font-family: -apple-system, sans-serif; background: #eef1f5; padding: 20px; max-width: 600px; margin: 0 auto; }
+        h1 { background: #222; color: white; margin: -20px -20px 20px -20px; padding: 20px; text-align: center; font-size: 20px; }
         
-        /* CLICKABLE IMAGE STYLES */
-        .card img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; background: #eee; cursor: zoom-in; transition: transform 0.2s; }
-        .card img:hover { transform: scale(1.1); }
+        .search { width: 100%; padding: 15px; font-size: 16px; border-radius: 12px; border: 1px solid #ddd; box-sizing: border-box; margin-bottom: 20px; }
+        .card { background: white; padding: 15px; margin-bottom: 15px; border-radius: 12px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        
+        /* IMAGE ZOOM STYLES */
+        .img-container { text-align: center; cursor: zoom-in; flex-shrink: 0; }
+        .card img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; background: #eee; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .tap-hint { font-size: 10px; color: #007AFF; display: block; margin-top: 4px; font-weight: bold; }
         
         .info { flex-grow: 1; }
-        .name { font-weight: bold; display: block; margin-bottom: 8px; font-size: 16px; text-transform: capitalize; }
-        .btn-container { display: flex; gap: 10px; flex-wrap: wrap; }
-        button { border: none; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: white; }
+        .name { font-weight: bold; display: block; margin-bottom: 8px; font-size: 17px; text-transform: capitalize; color: #333; }
+        .btn-container { display: flex; gap: 8px; flex-wrap: wrap; }
+        button { border: none; padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; color: white; display: flex; align-items: center; gap: 5px; }
         .btn-us { background: #007AFF; }
         .btn-uk { background: #FF3B30; }
         .btn-play { background: #34C759; }
         #status { text-align: center; color: #666; margin-bottom: 20px; font-size: 14px; }
 
-        /* FULL SCREEN IMAGE MODAL */
-        #modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); align-items: center; justify-content: center; }
-        #modal img { max-width: 90%; max-height: 90%; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
-        #modal span { position: absolute; top: 20px; right: 30px; color: white; font-size: 40px; font-weight: bold; cursor: pointer; }
+        /* FULL SCREEN POPUP */
+        #modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.95); align-items: center; justify-content: center; flex-direction: column; }
+        #modal img { max-width: 95%; max-height: 80vh; border-radius: 8px; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
+        #close-btn { color: white; font-size: 18px; margin-top: 20px; padding: 10px 20px; border: 1px solid white; border-radius: 30px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <input type="text" class="search" placeholder="Search fighters..." onkeyup="filter(this.value)">
-    <div id="status">Updating list...</div>
+    <h1>Freedom Fighters Audio</h1>
+
+    <input type="text" class="search" placeholder="Search..." onkeyup="filter(this.value)">
+    <div id="status">Scanning GitHub Vault...</div>
     <div id="list"></div>
-    
     <audio id="player"></audio>
 
     <div id="modal" onclick="closeModal()">
-        <span>&times;</span>
         <img id="modal-img">
+        <div id="close-btn">Close Image</div>
     </div>
 
 <script>
     const USER = "dogierez01";
     const REPO = "freedom-fighters";
     const BRANCH = "main";
-    
     const API_URL = `https://api.github.com/repos/${USER}/${REPO}/contents/`;
     const RAW_URL = `https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/`;
 
@@ -54,64 +58,61 @@
     const player = document.getElementById("player");
     const modal = document.getElementById("modal");
     const modalImg = document.getElementById("modal-img");
-    
     let allFighters = [];
 
     async function init() {
         try {
             const response = await fetch(API_URL);
-            if (!response.ok) throw new Error("Could not connect to GitHub.");
+            if (!response.ok) throw new Error("Connection failed");
             const files = await response.json();
-
             let fighters = {};
-            
+
             files.forEach(file => {
-                let lowerName = file.name.toLowerCase();
+                let lower = file.name.toLowerCase();
+                if (lower.endsWith('.md') || lower.endsWith('.html') || lower.endsWith('.css') || lower.startsWith('.')) return;
 
-                // 1. CLEANUP: Ignore system files
-                if (lowerName.endsWith('.md') || lowerName.endsWith('.html') || lowerName.endsWith('.css') || lowerName.startsWith('.')) return;
-
-                // 2. MERGE LOGIC: Remove extra words to match "Nelson Mandela"
-                let cleanName = file.name
-                    .replace(/\.[^/.]+$/, "") // Remove extension
-                    .replace(/_|-/g, " ")     // Remove dashes
-                    .replace(/ bio| us| uk| female| male| english/gi, "") // Remove keywords
+                // --- NUCLEAR MERGING LOGIC ---
+                // 1. Remove file extensions and junk words
+                let clean = lower
+                    .replace(/\.[^/.]+$/, "") 
+                    .replace(/ bio| us| uk| female| male| english/gi, "")
                     .trim();
 
-                // 3. ID GENERATION: Use lower-case ID to merge "Nelson Mandela" and "nelson mandela"
-                let id = cleanName.toLowerCase(); 
-                let displayName = cleanName.replace(/\b\w/g, l => l.toUpperCase()); // Capitalize for display
+                // 2. CREATE ID: Remove ALL spaces and symbols (Force "Nelson Mandela" == "Nelson_Mandela")
+                let id = clean.replace(/[^a-z0-9]/g, ""); 
+                
+                // 3. DISPLAY NAME: Clean up the messy ID for the human eye
+                let displayName = clean
+                    .replace(/_/g, " ") // Turn underscores back to spaces for display
+                    .replace(/\b\w/g, l => l.toUpperCase()); // Capitalize
 
                 if (!fighters[id]) fighters[id] = { name: displayName, us: "", uk: "", general: "", img: "" };
-                
-                // 4. ASSIGN FILES
-                if (lowerName.includes("wav") || lowerName.includes("mp3")) {
-                    if (lowerName.includes("us")) fighters[id].us = file.name;
-                    else if (lowerName.includes("uk")) fighters[id].uk = file.name;
+
+                // ASSIGN FILES
+                if (lower.includes("wav") || lower.includes("mp3")) {
+                    if (lower.includes("us")) fighters[id].us = file.name;
+                    else if (lower.includes("uk")) fighters[id].uk = file.name;
                     else fighters[id].general = file.name;
-                } 
-                else if (lowerName.includes("jpg") || lowerName.includes("png") || lowerName.includes("jpeg")) {
+                } else if (lower.includes("jpg") || lower.includes("png") || lower.includes("jpeg")) {
                     fighters[id].img = file.name;
                 }
             });
 
             allFighters = Object.values(fighters).filter(f => f.us || f.uk || f.general || f.img);
             allFighters.sort((a, b) => a.name.localeCompare(b.name));
-            
             render(allFighters);
             status.style.display = 'none';
 
-        } catch (error) {
-            status.innerHTML = "❌ Error: " + error.message;
-        }
+        } catch (error) { status.innerHTML = "❌ " + error.message; }
     }
 
     function render(items) {
         list.innerHTML = items.map(f => `
             <div class="card">
-                <img src="${f.img ? RAW_URL + encodeURIComponent(f.img) : ''}" 
-                     onerror="this.src='https://via.placeholder.com/60?text=IMG'"
-                     onclick="openModal('${f.img ? RAW_URL + encodeURIComponent(f.img) : ''}')">
+                <div class="img-container" onclick="openModal('${f.img ? RAW_URL + encodeURIComponent(f.img) : ''}')">
+                    <img src="${f.img ? RAW_URL + encodeURIComponent(f.img) : ''}" onerror="this.src='https://via.placeholder.com/70?text=?'">
+                    <span class="tap-hint">🔍 Tap</span>
+                </div>
                 <div class="info">
                     <span class="name">${f.name}</span>
                     <div class="btn-container">
@@ -123,23 +124,10 @@
             </div>
         `).join('');
     }
-    
-    function play(filename) { 
-        player.src = RAW_URL + encodeURIComponent(filename); 
-        player.play(); 
-    }
-    
-    // FULL SCREEN IMAGE LOGIC
-    function openModal(src) {
-        if (!src || src.includes("placeholder")) return;
-        modal.style.display = "flex";
-        modalImg.src = src;
-    }
 
-    function closeModal() {
-        modal.style.display = "none";
-    }
-    
+    function play(f) { player.src = RAW_URL + encodeURIComponent(f); player.play(); }
+    function openModal(src) { if(src && !src.includes("placeholder")) { modal.style.display = "flex"; modalImg.src = src; } }
+    function closeModal() { modal.style.display = "none"; }
     function filter(q) { render(allFighters.filter(f => f.name.toLowerCase().includes(q.toLowerCase()))); }
     
     init();
