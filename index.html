@@ -8,15 +8,24 @@
         body { font-family: -apple-system, sans-serif; background: #f0f2f5; padding: 20px; max-width: 600px; margin: 0 auto; }
         .search { width: 100%; padding: 15px; font-size: 16px; border-radius: 12px; border: 1px solid #ddd; box-sizing: border-box; margin-bottom: 20px; }
         .card { background: white; padding: 15px; margin-bottom: 10px; border-radius: 12px; display: flex; align-items: center; gap: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .card img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; background: #eee; }
+        
+        /* CLICKABLE IMAGE STYLES */
+        .card img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; background: #eee; cursor: zoom-in; transition: transform 0.2s; }
+        .card img:hover { transform: scale(1.1); }
+        
         .info { flex-grow: 1; }
         .name { font-weight: bold; display: block; margin-bottom: 8px; font-size: 16px; text-transform: capitalize; }
         .btn-container { display: flex; gap: 10px; flex-wrap: wrap; }
         button { border: none; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: white; }
-        .btn-us { background: #007AFF; } /* Blue */
-        .btn-uk { background: #FF3B30; } /* Red */
-        .btn-play { background: #34C759; } /* Green (Default) */
+        .btn-us { background: #007AFF; }
+        .btn-uk { background: #FF3B30; }
+        .btn-play { background: #34C759; }
         #status { text-align: center; color: #666; margin-bottom: 20px; font-size: 14px; }
+
+        /* FULL SCREEN IMAGE MODAL */
+        #modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); align-items: center; justify-content: center; }
+        #modal img { max-width: 90%; max-height: 90%; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        #modal span { position: absolute; top: 20px; right: 30px; color: white; font-size: 40px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -24,7 +33,13 @@
     <input type="text" class="search" placeholder="Search fighters..." onkeyup="filter(this.value)">
     <div id="status">Updating list...</div>
     <div id="list"></div>
+    
     <audio id="player"></audio>
+
+    <div id="modal" onclick="closeModal()">
+        <span>&times;</span>
+        <img id="modal-img">
+    </div>
 
 <script>
     const USER = "dogierez01";
@@ -37,6 +52,9 @@
     const list = document.getElementById("list");
     const status = document.getElementById("status");
     const player = document.getElementById("player");
+    const modal = document.getElementById("modal");
+    const modalImg = document.getElementById("modal-img");
+    
     let allFighters = [];
 
     async function init() {
@@ -50,35 +68,34 @@
             files.forEach(file => {
                 let lowerName = file.name.toLowerCase();
 
-                // 1. BETTER CLEANUP: Case-insensitive check for junk files
+                // 1. CLEANUP: Ignore system files
                 if (lowerName.endsWith('.md') || lowerName.endsWith('.html') || lowerName.endsWith('.css') || lowerName.startsWith('.')) return;
 
-                // 2. SMARTER NAMING: Remove "Bio", "US", "UK" to find the REAL name
-                // This merges "Nelson Mandela Bio" and "Nelson Mandela US" into just "Nelson Mandela"
+                // 2. MERGE LOGIC: Remove extra words to match "Nelson Mandela"
                 let cleanName = file.name
                     .replace(/\.[^/.]+$/, "") // Remove extension
-                    .replace(/_|-/g, " ")     // Replace underscores/dashes with spaces
-                    .replace(/ bio| us| uk| female| male| english/gi, "") // Remove keywords (Case Insensitive)
+                    .replace(/_|-/g, " ")     // Remove dashes
+                    .replace(/ bio| us| uk| female| male| english/gi, "") // Remove keywords
                     .trim();
 
-                // Capitalize First Letters for display
-                let displayName = cleanName.replace(/\b\w/g, l => l.toUpperCase());
+                // 3. ID GENERATION: Use lower-case ID to merge "Nelson Mandela" and "nelson mandela"
+                let id = cleanName.toLowerCase(); 
+                let displayName = cleanName.replace(/\b\w/g, l => l.toUpperCase()); // Capitalize for display
+
+                if (!fighters[id]) fighters[id] = { name: displayName, us: "", uk: "", general: "", img: "" };
                 
-                if (!fighters[cleanName]) fighters[cleanName] = { name: displayName, us: "", uk: "", general: "", img: "" };
-                
-                // 3. ASSIGN FILES
+                // 4. ASSIGN FILES
                 if (lowerName.includes("wav") || lowerName.includes("mp3")) {
-                    if (lowerName.includes("us")) fighters[cleanName].us = file.name;
-                    else if (lowerName.includes("uk")) fighters[cleanName].uk = file.name;
-                    else fighters[cleanName].general = file.name; 
+                    if (lowerName.includes("us")) fighters[id].us = file.name;
+                    else if (lowerName.includes("uk")) fighters[id].uk = file.name;
+                    else fighters[id].general = file.name;
                 } 
                 else if (lowerName.includes("jpg") || lowerName.includes("png") || lowerName.includes("jpeg")) {
-                    fighters[cleanName].img = file.name;
+                    fighters[id].img = file.name;
                 }
             });
 
             allFighters = Object.values(fighters).filter(f => f.us || f.uk || f.general || f.img);
-            // Sort alphabetically
             allFighters.sort((a, b) => a.name.localeCompare(b.name));
             
             render(allFighters);
@@ -92,7 +109,9 @@
     function render(items) {
         list.innerHTML = items.map(f => `
             <div class="card">
-                <img src="${f.img ? RAW_URL + encodeURIComponent(f.img) : ''}" onerror="this.src='https://via.placeholder.com/60?text=IMG'">
+                <img src="${f.img ? RAW_URL + encodeURIComponent(f.img) : ''}" 
+                     onerror="this.src='https://via.placeholder.com/60?text=IMG'"
+                     onclick="openModal('${f.img ? RAW_URL + encodeURIComponent(f.img) : ''}')">
                 <div class="info">
                     <span class="name">${f.name}</span>
                     <div class="btn-container">
@@ -108,6 +127,17 @@
     function play(filename) { 
         player.src = RAW_URL + encodeURIComponent(filename); 
         player.play(); 
+    }
+    
+    // FULL SCREEN IMAGE LOGIC
+    function openModal(src) {
+        if (!src || src.includes("placeholder")) return;
+        modal.style.display = "flex";
+        modalImg.src = src;
+    }
+
+    function closeModal() {
+        modal.style.display = "none";
     }
     
     function filter(q) { render(allFighters.filter(f => f.name.toLowerCase().includes(q.toLowerCase()))); }
