@@ -3,25 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
-    <meta property="og:title" content="Freedom Fighters Audio">
-    <meta property="og:description" content="Listen to biographies of historical figures.">
-    <meta property="og:image" content="https://dogierez01.github.io/freedom-fighters/cover.jpg">
-    <meta property="og:url" content="https://dogierez01.github.io/freedom-fighters/">
-    <meta property="og:type" content="website">
-
     <title>Freedom Fighters</title>
     <style>
         /* DARK MODE & LAYOUT */
+        /* padding-top: 140px ensures the list doesn't get hidden behind the player */
         body { font-family: -apple-system, sans-serif; background: #121212; color: #e0e0e0; padding: 20px; padding-top: 140px; max-width: 600px; margin: 0 auto; }
         
         /* STICKY PLAYER (Top) */
         #audio-bar { position: fixed; top: 0; left: 0; width: 100%; background: #000; border-bottom: 2px solid #333; padding: 10px; z-index: 1000; box-shadow: 0 5px 15px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; }
         #now-playing { color: #4dabf7; font-size: 13px; margin-bottom: 8px; font-weight: bold; text-align: center; }
         #player { width: 95%; height: 40px; outline: none; }
-
-        /* PUSH LIST DOWN SO PLAYER DOESN'T HIDE IT */
-        #list { margin-top: 20px; }
 
         .search { width: 100%; padding: 15px; font-size: 16px; border-radius: 12px; border: 1px solid #333; background: #1e1e1e; color: white; margin-bottom: 20px; }
         .card { background: #1e1e1e; padding: 15px; margin-bottom: 15px; border-radius: 12px; display: flex; align-items: center; gap: 15px; border: 1px solid #333; }
