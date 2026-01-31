@@ -48,30 +48,38 @@
             let fighters = {};
             
             files.forEach(file => {
-                // CLEANUP RULE: Ignore system files like .md, .html, .css
-                if (file.name.endsWith('.md') || file.name.endsWith('.html') || file.name.endsWith('.css')) return;
-
-                // Smart Grouping: "Alija Izetbegović" (First 2 words)
-                let nameParts = file.name.split(' ');
-                let baseName = nameParts.slice(0, 2).join(' ').replace('.wav','').replace('.mp3','').replace('.jpg','').trim();
-                
-                if (!fighters[baseName]) fighters[baseName] = { name: baseName, us: "", uk: "", general: "", img: "" };
-                
                 let lowerName = file.name.toLowerCase();
+
+                // 1. BETTER CLEANUP: Case-insensitive check for junk files
+                if (lowerName.endsWith('.md') || lowerName.endsWith('.html') || lowerName.endsWith('.css') || lowerName.startsWith('.')) return;
+
+                // 2. SMARTER NAMING: Remove "Bio", "US", "UK" to find the REAL name
+                // This merges "Nelson Mandela Bio" and "Nelson Mandela US" into just "Nelson Mandela"
+                let cleanName = file.name
+                    .replace(/\.[^/.]+$/, "") // Remove extension
+                    .replace(/_|-/g, " ")     // Replace underscores/dashes with spaces
+                    .replace(/ bio| us| uk| female| male| english/gi, "") // Remove keywords (Case Insensitive)
+                    .trim();
+
+                // Capitalize First Letters for display
+                let displayName = cleanName.replace(/\b\w/g, l => l.toUpperCase());
                 
-                // Logic: Find US, UK, or "General" audio
+                if (!fighters[cleanName]) fighters[cleanName] = { name: displayName, us: "", uk: "", general: "", img: "" };
+                
+                // 3. ASSIGN FILES
                 if (lowerName.includes("wav") || lowerName.includes("mp3")) {
-                    if (lowerName.includes("us")) fighters[baseName].us = file.name;
-                    else if (lowerName.includes("uk")) fighters[baseName].uk = file.name;
-                    else fighters[baseName].general = file.name; // Catch-all for other audio
+                    if (lowerName.includes("us")) fighters[cleanName].us = file.name;
+                    else if (lowerName.includes("uk")) fighters[cleanName].uk = file.name;
+                    else fighters[cleanName].general = file.name; 
                 } 
-                else if (lowerName.includes("jpg") || lowerName.includes("png") || lowerName.includes("bio")) {
-                    fighters[baseName].img = file.name;
+                else if (lowerName.includes("jpg") || lowerName.includes("png") || lowerName.includes("jpeg")) {
+                    fighters[cleanName].img = file.name;
                 }
             });
 
-            // Convert to array and filter out empty cards (ones with no audio AND no image)
             allFighters = Object.values(fighters).filter(f => f.us || f.uk || f.general || f.img);
+            // Sort alphabetically
+            allFighters.sort((a, b) => a.name.localeCompare(b.name));
             
             render(allFighters);
             status.style.display = 'none';
