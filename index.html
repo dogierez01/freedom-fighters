@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
     <meta property="og:title" content="Freedom Fighters Audio">
-    <meta property="og:description" content="Listen to biographies of historical figures in US and UK English.">
+    <meta property="og:description" content="Listen to biographies of historical figures.">
     <meta property="og:image" content="https://dogierez01.github.io/freedom-fighters/cover.jpg">
     <meta property="og:url" content="https://dogierez01.github.io/freedom-fighters/">
     <meta property="og:type" content="website">
-    
+
     <title>Freedom Fighters</title>
     <style>
         /* DARK MODE & LAYOUT */
@@ -52,6 +52,11 @@
     <div id="audio-bar">
         <div id="now-playing">Select a track to play</div>
         <audio id="player" controls controlsList="nodownload"></audio>
+    </div>
+
+    <div style="text-align:center; margin-bottom: 20px;">
+        <p style="color: red; font-size: 12px;">DEBUG: Test Image Below</p>
+        <img src="cover.jpg" style="width: 100%; max-height: 200px; object-fit: contain; border: 2px solid red;" alt="IF YOU SEE THIS TEXT, IMAGE IS MISSING">
     </div>
 
     <input type="text" class="search" placeholder="Search fighters..." onkeyup="filter(this.value)">
