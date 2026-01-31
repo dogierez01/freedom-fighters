@@ -11,17 +11,18 @@
         .card img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; background: #eee; }
         .info { flex-grow: 1; }
         .name { font-weight: bold; display: block; margin-bottom: 8px; font-size: 16px; text-transform: capitalize; }
-        .btn-container { display: flex; gap: 10px; }
+        .btn-container { display: flex; gap: 10px; flex-wrap: wrap; }
         button { border: none; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: white; }
-        .btn-us { background: #007AFF; }
-        .btn-uk { background: #FF3B30; }
-        #status { text-align: center; color: #666; margin-bottom: 20px; }
+        .btn-us { background: #007AFF; } /* Blue */
+        .btn-uk { background: #FF3B30; } /* Red */
+        .btn-play { background: #34C759; } /* Green (Default) */
+        #status { text-align: center; color: #666; margin-bottom: 20px; font-size: 14px; }
     </style>
 </head>
 <body>
 
     <input type="text" class="search" placeholder="Search fighters..." onkeyup="filter(this.value)">
-    <div id="status">Scanning your GitHub Vault...</div>
+    <div id="status">Updating list...</div>
     <div id="list"></div>
     <audio id="player"></audio>
 
@@ -41,23 +42,37 @@
     async function init() {
         try {
             const response = await fetch(API_URL);
-            if (!response.ok) throw new Error("Could not find files.");
+            if (!response.ok) throw new Error("Could not connect to GitHub.");
             const files = await response.json();
 
             let fighters = {};
+            
             files.forEach(file => {
+                // CLEANUP RULE: Ignore system files like .md, .html, .css
+                if (file.name.endsWith('.md') || file.name.endsWith('.html') || file.name.endsWith('.css')) return;
+
+                // Smart Grouping: "Alija Izetbegović" (First 2 words)
                 let nameParts = file.name.split(' ');
                 let baseName = nameParts.slice(0, 2).join(' ').replace('.wav','').replace('.mp3','').replace('.jpg','').trim();
                 
-                if (!fighters[baseName]) fighters[baseName] = { name: baseName, us: "", uk: "", img: "" };
+                if (!fighters[baseName]) fighters[baseName] = { name: baseName, us: "", uk: "", general: "", img: "" };
                 
                 let lowerName = file.name.toLowerCase();
-                if (lowerName.includes("us") && (lowerName.includes("wav") || lowerName.includes("mp3"))) fighters[baseName].us = file.name;
-                else if (lowerName.includes("uk") && (lowerName.includes("wav") || lowerName.includes("mp3"))) fighters[baseName].uk = file.name;
-                else if (lowerName.includes("jpg") || lowerName.includes("png") || lowerName.includes("bio")) fighters[baseName].img = file.name;
+                
+                // Logic: Find US, UK, or "General" audio
+                if (lowerName.includes("wav") || lowerName.includes("mp3")) {
+                    if (lowerName.includes("us")) fighters[baseName].us = file.name;
+                    else if (lowerName.includes("uk")) fighters[baseName].uk = file.name;
+                    else fighters[baseName].general = file.name; // Catch-all for other audio
+                } 
+                else if (lowerName.includes("jpg") || lowerName.includes("png") || lowerName.includes("bio")) {
+                    fighters[baseName].img = file.name;
+                }
             });
 
-            allFighters = Object.values(fighters);
+            // Convert to array and filter out empty cards (ones with no audio AND no image)
+            allFighters = Object.values(fighters).filter(f => f.us || f.uk || f.general || f.img);
+            
             render(allFighters);
             status.style.display = 'none';
 
@@ -69,12 +84,13 @@
     function render(items) {
         list.innerHTML = items.map(f => `
             <div class="card">
-                <img src="${f.img ? RAW_URL + encodeURIComponent(f.img) : ''}" onerror="this.src='https://via.placeholder.com/60'">
+                <img src="${f.img ? RAW_URL + encodeURIComponent(f.img) : ''}" onerror="this.src='https://via.placeholder.com/60?text=IMG'">
                 <div class="info">
                     <span class="name">${f.name}</span>
                     <div class="btn-container">
                         ${f.us ? `<button class="btn-us" onclick="play('${f.us}')">🇺🇸 US</button>` : ''}
                         ${f.uk ? `<button class="btn-uk" onclick="play('${f.uk}')">🇬🇧 UK</button>` : ''}
+                        ${(!f.us && !f.uk && f.general) ? `<button class="btn-play" onclick="play('${f.general}')">▶ Play</button>` : ''}
                     </div>
                 </div>
             </div>
