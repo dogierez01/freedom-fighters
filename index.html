@@ -146,9 +146,10 @@
                 let name = file.name.toLowerCase();
                 if (name.includes(".html") || name.includes(".css") || name.startsWith(".")) return;
 
+                // ▼▼▼ THE FIX: ADDED 'bio' TO THE IGNORE LIST ▼▼▼
                 let baseName = name
                     .replace(/\.(mp3|wav|jpg|png|jpeg)$/, "") 
-                    .replace(/ female| male| uk| us/g, "") 
+                    .replace(/ female| male| uk| us| bio/gi, "") // <--- 'bio' added here!
                     .trim();
 
                 if (!people[baseName]) people[baseName] = { name: baseName, audios: [], img: "" };
