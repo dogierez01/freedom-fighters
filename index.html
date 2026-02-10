@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Freedom Fighters</title>
     <style>
         /* BASE STYLES */
@@ -49,7 +49,10 @@
         .search { width: 100%; padding: 15px; font-size: 16px; border-radius: 12px; border: 1px solid #333; background: #1e1e1e; color: white; margin-bottom: 20px; box-sizing: border-box; }
         
         .card { background: #1e1e1e; padding: 15px; margin-bottom: 15px; border-radius: 12px; display: flex; align-items: center; gap: 15px; border: 1px solid #333; }
-        .img-container { text-align: center; flex-shrink: 0; }
+        
+        /* RESTORED ZOOM CURSOR */
+        .img-container { text-align: center; flex-shrink: 0; cursor: zoom-in; }
+        
         .card img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; background: #333; border: 2px solid #555; }
         .info { flex-grow: 1; }
         .name { font-weight: bold; display: block; margin-bottom: 10px; font-size: 17px; text-transform: capitalize; color: #fff; }
@@ -61,10 +64,15 @@
             display: flex; align-items: center; gap: 10px; 
         }
         
-        /* FREEDOM FIGHTERS COLORS */
+        /* COLORS */
         .btn-uk { background: #d63031; } /* Red */
         .btn-us { background: #0984e3; } /* Blue */
         .btn-generic { background: #2f9e44; } /* Green */
+
+        /* RESTORED MODAL STYLES (THE ZOOM FEATURE) */
+        #modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.95); align-items: center; justify-content: center; flex-direction: column; }
+        #modal img { max-width: 95%; max-height: 80vh; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        #close-btn { color: white; font-size: 18px; margin-top: 20px; padding: 10px 30px; background: #333; border-radius: 30px; cursor: pointer; border: 1px solid #555; }
     </style>
 </head>
 <body>
@@ -93,6 +101,11 @@
         <iframe src="https://freedom-fighters-by-lingua-pharmacia.netlify.app/"></iframe>
     </div>
 
+    <div id="modal" onclick="if(event.target.id === 'modal' || event.target.id === 'close-btn') closeModal()">
+        <img id="modal-img">
+        <div id="close-btn">Close Image</div>
+    </div>
+
 <script>
     /* --- TAB SWITCHING LOGIC --- */
     function switchTab(mode) {
@@ -106,13 +119,13 @@
         if (mode === 'listen') {
             listenContent.style.display = 'block';
             quizContent.style.display = 'none';
-            audioControls.style.display = 'flex'; // Show player
+            audioControls.style.display = 'flex'; 
             btnListen.classList.add('active');
             btnQuiz.classList.remove('active');
         } else {
             listenContent.style.display = 'none';
             quizContent.style.display = 'block';
-            audioControls.style.display = 'none'; // Hide player to save space
+            audioControls.style.display = 'none'; 
             btnListen.classList.remove('active');
             btnQuiz.classList.add('active');
         }
@@ -120,11 +133,7 @@
 
     /* --- GITHUB REPO LOGIC --- */
     const USER = "dogierez01";
-    
-    // ▼▼▼ TARGETING FREEDOM FIGHTERS REPO ▼▼▼
     const REPO = "freedom-fighters"; 
-    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-
     const BRANCH = "main";
     const API_URL = `https://api.github.com/repos/${USER}/${REPO}/contents/`;
     const RAW_URL = `https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/`;
@@ -133,6 +142,8 @@
     const status = document.getElementById("status");
     const player = document.getElementById("player");
     const nowPlaying = document.getElementById("now-playing");
+    const modal = document.getElementById("modal");
+    const modalImg = document.getElementById("modal-img");
 
     async function init() {
         try {
@@ -146,10 +157,10 @@
                 let name = file.name.toLowerCase();
                 if (name.includes(".html") || name.includes(".css") || name.startsWith(".")) return;
 
-                // ▼▼▼ THE FIX: ADDED 'bio' TO THE IGNORE LIST ▼▼▼
+                // BIO FIX IS HERE
                 let baseName = name
                     .replace(/\.(mp3|wav|jpg|png|jpeg)$/, "") 
-                    .replace(/ female| male| uk| us| bio/gi, "") // <--- 'bio' added here!
+                    .replace(/ female| male| uk| us| bio/gi, "") 
                     .trim();
 
                 if (!people[baseName]) people[baseName] = { name: baseName, audios: [], img: "" };
@@ -173,12 +184,11 @@
 
     function render(items) {
         list.innerHTML = items.map(p => {
-            // STRICT SORTING: UK -> US Male -> US Female
             p.audios.sort((a, b) => getSortScore(a) - getSortScore(b));
             
             return `
             <div class="card">
-                <div class="img-container">
+                <div class="img-container" onclick="openModal('${p.img ? RAW_URL + encodeURIComponent(p.img) : ''}')">
                     <img src="${p.img ? RAW_URL + encodeURIComponent(p.img) : 'https://via.placeholder.com/70?text=?'}" onerror="this.src='https://via.placeholder.com/70?text=?'">
                 </div>
                 <div class="info">
@@ -211,13 +221,21 @@
         if (lower.includes("female")) text = "Female";
         else if (lower.includes("male")) text = "Male";
 
-        // BIG FLAG (3.0x size)
         let content = "";
         if (flag) content += `<span style="font-size: 3.0em; line-height: 0.8;">${flag}</span>`;
         content += `<span>${text}</span>`;
 
         return `<button class="play-btn ${css}" onclick="play('${filename}')">${content}</button>`;
     }
+
+    /* --- RESTORED ZOOM FUNCTIONS --- */
+    function openModal(src) { 
+        if(src && !src.includes("placeholder")) { 
+            modal.style.display = "flex"; 
+            modalImg.src = src; 
+        } 
+    }
+    function closeModal() { modal.style.display = "none"; }
 
     function play(file) { 
         player.src = RAW_URL + encodeURIComponent(file); 
