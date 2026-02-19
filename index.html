@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Freedom Fighters - Learning App</title>
+    <title>Freedom Fighters</title>
     
     <script>
         function startApp() {
@@ -50,7 +50,7 @@
         .search { width: 100%; padding: 15px; font-size: 16px; border-radius: 12px; border: 1px solid #333; background: #1e1e1e; color: white; margin-bottom: 20px; }
         
         .card { background: #1e1e1e; padding: 20px; margin-bottom: 25px; border-radius: 15px; border: 1px solid #333; }
-        .name { font-weight: 900; display: block; margin-bottom: 15px; font-size: 22px; text-transform: uppercase; color: #fff; text-align: center; border-bottom: 2px solid #444; padding-bottom: 10px; }
+        .name { font-weight: 900; display: block; margin-bottom: 15px; font-size: 22px; text-transform: capitalize; color: #fff; text-align: center; border-bottom: 2px solid #444; padding-bottom: 10px; }
         
         .btn-container { display: flex; flex-direction: column; gap: 10px; }
         .play-btn { border: none; padding: 14px; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; color: white; text-align: center; }
@@ -60,337 +60,338 @@
 
         /* REVEAL SECTION */
         .read-up-content { display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid #444; }
-        .bio-text { font-size: 17px; line-height: 1.7; color: #ddd; margin-bottom: 30px; }
+        .bio-text { font-size: 17px; line-height: 1.7; color: #ddd; margin-bottom: 30px; text-align: justify; }
         .quiz-container { background: #000; padding: 20px; border-radius: 12px; border: 1px solid #007AFF; }
         .q-block { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #222; }
         .q-block p { font-weight: bold; margin-bottom: 10px; color: #4dabf7; }
-        label { margin-right: 20px; cursor: pointer; font-size: 16px; }
+        label { margin-right: 20px; cursor: pointer; font-size: 16px; display: inline-block; margin-bottom: 5px;}
     </style>
 </head>
 <body>
 
     <div id="splash-screen">
         <img src="welcome-poster.png" alt="Freedom Fighters" id="splash-img" onerror="this.src='https://via.placeholder.com/400x600?text=Freedom+Fighters'">
-        <button id="start-btn" onclick="startApp()">START LEARNING 🦅</button>
+        <button id="start-btn" onclick="startApp()">START 🦅</button>
     </div>
 
     <div id="header-area">
-        <div id="app-title">🦅 Freedom Fighters Biographies</div>
+        <div id="app-title">🦅 Freedom Fighters</div>
         <div class="toggle-container">
             <button class="toggle-btn active">🎧 Study Mode</button>
         </div>
         <div id="audio-controls">
-            <div id="now-playing">Select a fighter to begin</div>
+            <div id="now-playing">Select a fighter</div>
             <div class="player-row">
                 <audio id="player" controls controlsList="nodownload"></audio>
-                <button id="btn-snail" onclick="toggleSnail()" title="Slow Mode">🐌</button>
+                <button id="btn-snail" onclick="toggleSnail()">🐌</button>
             </div>
         </div>
     </div>
 
     <div id="content-listen">
-        <input type="text" class="search" placeholder="Search for a hero..." onkeyup="filter(this.value)">
+        <input type="text" class="search" placeholder="Search..." onkeyup="filter(this.value)">
         <div id="list"></div>
-        <div id="status" style="text-align:center; color:#666; margin-top:20px;">Fetching biographies...</div>
+        <div id="status" style="text-align:center; color:#666; margin-top:20px;">Loading...</div>
     </div>
 
     <script>
-        const fightersTextData = {
+        // DATA OBJECT: Biographies and 6 T/F Questions
+        const fightersData = {
             "alija izetbegović": {
                 text: "Alija Izetbegović was born in Bosnia and Herzegovina in 1925. He was a lawyer, philosopher, and politician. He spent time in jail under the Communist government of Yugoslavia because of his religious writings. In 1990, he became the first President of the independent Republic of Bosnia and Herzegovina. He led the country through the Bosnian War, which lasted from 1992 to 1995. He worked to protect the independence and unity of Bosnia and Herzegovina during the war. After the war, he was one of the signers of the Dayton Peace Agreement, which ended the fighting. He continued to serve as a member of the country's presidency until 2000. He is considered the father of the Bosnian nation. He died in 2003.",
                 questions: [
-                    { q: "Alija Izetbegović was the first President of independent Bosnia and Herzegovina.", answer: true },
-                    { q: "He was imprisoned because of his political actions in the army.", answer: false },
-                    { q: "The Bosnian War lasted for five years.", answer: false },
-                    { q: "He helped sign the Dayton Peace Agreement.", answer: true },
-                    { q: "He served as a president until 2003.", answer: false },
-                    { q: "He is known as the father of the Bosnian nation.", answer: true }
+                    { q: "He was the first President of independent Bosnia and Herzegovina.", a: true },
+                    { q: "He was jailed because of his military service.", a: false },
+                    { q: "The Bosnian War lasted for three years (1992-1995).", a: true },
+                    { q: "He signed the Dayton Peace Agreement.", a: true },
+                    { q: "He served as president until the year 2003.", a: false },
+                    { q: "He is known as the father of the Bosnian nation.", a: true }
                 ]
             },
             "amílcar cabral": {
                 text: "Amílcar Cabral was born in Guinea-Bissau in 1924, which was a Portuguese colony. He was an agricultural engineer and a political leader. He founded the African Party for the Independence of Guinea and Cape Verde (PAIGC). This party fought to gain independence for both countries from Portugal. Cabral was a brilliant thinker and a skilled organizer. He believed that successful liberation movements needed both armed struggle and strong political work among the people. His ideas about culture and national identity were important to many anti-colonial movements. He led the PAIGC in a long and successful guerrilla war against the Portuguese army. Tragically, he was assassinated in 1973 by a rival faction within his own movement, just before Guinea-Bissau won independence.",
                 questions: [
-                    { q: "Cabral was an agricultural engineer.", answer: true },
-                    { q: "He founded the PAIGC to fight against Spanish rule.", answer: false },
-                    { q: "He believed in combining armed struggle with political work.", answer: true },
-                    { q: "He died of old age after his country won independence.", answer: false },
-                    { q: "His ideas influenced anti-colonial movements globally.", answer: true },
-                    { q: "He led a guerrilla war against the Portuguese army.", answer: true }
+                    { q: "He was an agricultural engineer.", a: true },
+                    { q: "He fought for independence from Spain.", a: false },
+                    { q: "He founded the PAIGC party.", a: true },
+                    { q: "He believed only in armed struggle without political work.", a: false },
+                    { q: "He led a guerrilla war against the Portuguese army.", a: true },
+                    { q: "He lived to see his country's independence in 1973.", a: false }
                 ]
             },
             "angela davis": {
                 text: "Angela Davis was born in the United States in 1944. She is a political activist, academic, and author. She became famous in the 1960s as a leader in the Communist Party USA and for her involvement with the Black Panther Party. She spoke out against racism, sexism, and the prison system. In 1970, she was accused of being involved in a court attack and kidnapping. She went into hiding and was placed on the FBI's Most Wanted List. She was later captured and spent over a year in jail before being acquitted, meaning found not guilty, in 1972. She continues to be a prominent voice for prison reform and the abolition of the prison system. She is also a university professor who teaches about the history of consciousness and feminist studies.",
                 questions: [
-                    { q: "Angela Davis was a leader in the Black Panther Party.", answer: true },
-                    { q: "She was found guilty of kidnapping in 1972.", answer: false },
-                    { q: "She was once on the FBI's Most Wanted List.", answer: true },
-                    { q: "She advocates for the complete abolition of the prison system.", answer: true },
-                    { q: "She is a university professor.", answer: true },
-                    { q: "She was born in the 1970s.", answer: false }
+                    { q: "She was a leader in the Communist Party USA.", a: true },
+                    { q: "She supported the existing prison system in the 1960s.", a: false },
+                    { q: "She was once on the FBI's Most Wanted List.", a: true },
+                    { q: "She was found guilty of kidnapping in 1972.", a: false },
+                    { q: "She is currently a university professor.", a: true },
+                    { q: "She focuses on feminist studies and history of consciousness.", a: true }
                 ]
             },
             "assata shakur": {
                 text: "Assata Shakur was born in the United States in 1947. She was a political activist and a member of the Black Panther Party and the Black Liberation Army. In 1973, she was involved in a roadside gunfight with police in New Jersey. She was convicted of murder in 1977 but maintained her innocence. In 1979, she escaped from prison and traveled to Cuba, where she was granted political asylum. She remains in Cuba today and is still wanted by the FBI.",
                 questions: [
-                    { q: "Assata Shakur was a member of the Black Liberation Army.", answer: true },
-                    { q: "She was convicted of murder in 1977.", answer: true },
-                    { q: "She has always admitted that she was guilty of the crime.", answer: false },
-                    { q: "She escaped from prison in 1979.", answer: true },
-                    { q: "She currently lives in the United States.", answer: false },
-                    { q: "She was granted political asylum in Cuba.", answer: true }
+                    { q: "She was a member of the Black Liberation Army.", a: true },
+                    { q: "She was convicted of murder in 1977.", a: true },
+                    { q: "She admitted her guilt after the roadside gunfight.", a: false },
+                    { q: "She escaped from prison in 1979.", a: true },
+                    { q: "She currently lives as a free citizen in New Jersey.", a: false },
+                    { q: "She was granted asylum in Cuba.", a: true }
                 ]
             },
             "bhagat singh": {
-                text: "Bhagat Singh was born in British India in 1907. He was a revolutionary who fought for India's independence from British rule. Unlike Mahatma Gandhi, Singh believed that armed struggle was necessary. In 1929, he threw a harmless bomb into the Central Legislative Assembly to protest. He was arrested and executed by the British in 1931 at the age of 23. He is considered a national hero in India and Pakistan.",
+                text: "Bhagat Singh was born in British India in 1907. He was a revolutionary who fought for India's independence from British rule. Unlike Gandhi, Singh believed armed struggle was necessary. In 1929, he threw a harmless bomb into the Central Legislative Assembly to protest. He was executed by the British in 1931 at age 23.",
                 questions: [
-                    { q: "Bhagat Singh followed Gandhi's non-violent methods.", answer: false },
-                    { q: "He was influenced by socialist and anarchist ideas.", answer: true },
-                    { q: "He threw a bomb into the Central Legislative Assembly in 1929.", answer: true },
-                    { q: "The bomb he threw was designed to kill many people.", answer: false },
-                    { q: "He was executed at the age of 23.", answer: true },
-                    { q: "He is only considered a hero in India, not Pakistan.", answer: false }
+                    { q: "He fought for Indian independence from the British.", a: true },
+                    { q: "He was a follower of Gandhi's non-violent movement.", a: false },
+                    { q: "He threw a bomb into the Central Legislative Assembly in 1929.", a: true },
+                    { q: "He was influenced by socialist ideas.", a: true },
+                    { q: "The bomb he threw was meant to kill everyone inside.", a: false },
+                    { q: "He was executed at the age of 23.", a: true }
                 ]
             },
             "bobby sands": {
-                text: "Bobby Sands was born in Northern Ireland in 1954. He was a member of the Provisional Irish Republican Army (IRA). In 1981, he led a hunger strike in prison, demanding to be treated as a political prisoner. He died after 66 days without food. While on strike, he was elected as a Member of Parliament in the UK.",
+                text: "Bobby Sands was born in Northern Ireland in 1954. He was a member of the IRA. In 1981, he led a 66-day hunger strike in prison demanding political prisoner status. He was elected as an MP while in jail and died during the strike.",
                 questions: [
-                    { q: "Bobby Sands was a member of the IRA.", answer: true },
-                    { q: "The IRA wanted Northern Ireland to stay in the United Kingdom.", answer: false },
-                    { q: "Sands led a hunger strike in 1981.", answer: true },
-                    { q: "He wanted to be treated as an ordinary criminal.", answer: false },
-                    { q: "He died after 66 days of fasting.", answer: true },
-                    { q: "He was elected to the UK Parliament while in prison.", answer: true }
+                    { q: "He was a member of the Provisional IRA.", a: true },
+                    { q: "He wanted Northern Ireland to join the Republic of Ireland.", a: true },
+                    { q: "His hunger strike lasted 66 days.", a: true },
+                    { q: "He was treated as a political prisoner from the start.", a: false },
+                    { q: "He was elected as a Member of Parliament while in prison.", a: true },
+                    { q: "He survived the hunger strike and was released.", a: false }
                 ]
             },
             "che guevara": {
-                text: "Ernesto 'Che' Guevara was an Argentine doctor and revolutionary. He joined Fidel Castro in the Cuban Revolution. He later left Cuba to start revolutions in Congo and Bolivia. In 1967, he was captured and executed in Bolivia. He is a global symbol of rebellion.",
+                text: "Ernesto 'Che' Guevara was an Argentine doctor and revolutionary. He joined Fidel Castro in the Cuban Revolution. He later left Cuba to start revolutions in Congo and Bolivia. In 1967, he was captured and executed in Bolivia.",
                 questions: [
-                    { q: "Che Guevara was originally a doctor.", answer: true },
-                    { q: "He was born in Cuba.", answer: false },
-                    { q: "He fought alongside Fidel Castro.", answer: true },
-                    { q: "He served in the Cuban government after the revolution.", answer: true },
-                    { q: "He died in the Congo.", answer: false },
-                    { q: "He was executed in 1967.", answer: true }
+                    { q: "He was born in Argentina.", a: true },
+                    { q: "He was a trained medical doctor.", a: true },
+                    { q: "He fought against Fidel Castro in Cuba.", a: false },
+                    { q: "He traveled to Congo to help start a revolution.", a: true },
+                    { q: "He died of natural causes in 1967.", a: false },
+                    { q: "He was executed by military forces in Bolivia.", a: true }
                 ]
             },
             "deniz gezmiş": {
-                text: "Deniz Gezmiş was a leading socialist activist in Turkey. He opposed American influence and was a founding member of the THKO. He was involved in armed actions and was executed by hanging in 1972 following a military coup.",
+                text: "Deniz Gezmiş was a leading socialist activist in Turkey. He opposed American influence and was a founding member of the THKO. He was involved in armed actions and was executed by hanging in 1972.",
                 questions: [
-                    { q: "Deniz Gezmiş was a left-wing student leader in Turkey.", answer: true },
-                    { q: "He supported American influence in Turkish politics.", answer: false },
-                    { q: "He was a founding member of the THKO.", answer: true },
-                    { q: "He was arrested after a military coup in 1971.", answer: true },
-                    { q: "He died of a hunger strike in prison.", answer: false },
-                    { q: "He was executed by hanging in 1972.", answer: true }
+                    { q: "He was a leading figure in the Turkish left-wing movement.", a: true },
+                    { q: "He supported American influence in Turkey.", a: false },
+                    { q: "He founded the People's Liberation Army of Turkey (THKO).", a: true },
+                    { q: "He was arrested after a military coup in 1971.", a: true },
+                    { q: "He died in a bank robbery.", a: false },
+                    { q: "He was executed by hanging in 1972.", a: true }
                 ]
             },
             "djamila bouhired": {
-                text: "Djamila Bouhired was an Algerian resistance fighter. She planted bombs during the Battle of Algiers in 1956. She was sentenced to death but released in 1962 after Algeria won independence. She is a national hero.",
+                text: "Djamila Bouhired was an Algerian resistance fighter. She joined the FLN and planted bombs during the Battle of Algiers in 1956. She was sentenced to death but released in 1962 after independence.",
                 questions: [
-                    { q: "Djamila Bouhired fought for Algerian independence from France.", answer: true },
-                    { q: "She was part of the National Liberation Front (FLN).", answer: true },
-                    { q: "She was captured and sentenced to life in prison initially.", answer: false },
-                    { q: "A global campaign helped save her from the death penalty.", answer: true },
-                    { q: "She was released before Algeria won independence.", answer: false },
-                    { q: "She is a symbol of women's role in the freedom fight.", answer: true }
+                    { q: "She fought against French rule in Algeria.", a: true },
+                    { q: "She was a member of the FLN.", a: true },
+                    { q: "She planted bombs during the 1956 Battle of Algiers.", a: true },
+                    { q: "The French successfully executed her in prison.", a: false },
+                    { q: "An international campaign helped save her life.", a: true },
+                    { q: "She was released in 1962.", a: true }
                 ]
             },
             "frantz fanon": {
-                text: "Frantz Fanon was a psychiatrist and writer from Martinique. He worked in Algeria and supported the use of violence to achieve liberation from colonialism. His book 'The Wretched of the Earth' is very influential.",
+                text: "Frantz Fanon was a psychiatrist and revolutionary from Martinique. He worked in Algeria and supported armed struggle against colonialism. His book 'The Wretched of the Earth' is world-famous.",
                 questions: [
-                    { q: "Frantz Fanon was born in Algeria.", answer: false },
-                    { q: "He was a trained psychiatrist.", answer: true },
-                    { q: "He wrote 'The Wretched of the Earth'.", answer: true },
-                    { q: "He believed colonized people should never use violence.", answer: false },
-                    { q: "His ideas influenced anti-colonial movements in Africa.", answer: true },
-                    { q: "He died of leukemia in 1961.", answer: true }
+                    { q: "He was a trained psychiatrist.", a: true },
+                    { q: "He was born in France.", a: false },
+                    { q: "He wrote the book 'The Wretched of the Earth'.", a: true },
+                    { q: "He believed colonialism had psychological effects.", a: true },
+                    { q: "He opposed all forms of violence for liberation.", a: false },
+                    { q: "He died of leukemia in 1961.", a: true }
                 ]
             },
             "fred hampton": {
-                text: "Fred Hampton was a leader in the Black Panther Party in Chicago. He created the 'Rainbow Coalition'. He was killed at age 21 during a police raid in 1969, which is seen as a political assassination.",
+                text: "Fred Hampton was a leader in the Black Panther Party in Chicago. He created the 'Rainbow Coalition'. He was killed at age 21 during a police raid in 1969.",
                 questions: [
-                    { q: "Fred Hampton was a leader in the Black Panther Party.", answer: true },
-                    { q: "He created the 'Rainbow Coalition' to unite different groups.", answer: true },
-                    { q: "He only wanted to work with Black organizations.", answer: false },
-                    { q: "He was killed during a raid on his apartment.", answer: true },
-                    { q: "He was 35 years old when he died.", answer: false },
-                    { q: "His death is considered a political assassination.", answer: true }
+                    { q: "He was a leader of the Black Panther Party in Chicago.", a: true },
+                    { q: "He created the 'Rainbow Coalition'.", a: true },
+                    { q: "He united different racial groups against oppression.", a: true },
+                    { q: "He was killed when he was 50 years old.", a: false },
+                    { q: "The police and FBI carried out a raid on his apartment.", a: true },
+                    { q: "He died of a natural illness in 1969.", a: false }
                 ]
             },
             "george habash": {
-                text: "George Habash was a Palestinian doctor and founder of the PFLP. He believed in a wider Arab revolution. He led the PFLP for decades using armed resistance.",
+                text: "George Habash was a Palestinian doctor and founder of the PFLP. He believed in a secular state and led the PFLP for decades using armed resistance. He died in 2008.",
                 questions: [
-                    { q: "George Habash was a Christian doctor.", answer: true },
-                    { q: "He founded the PFLP in 1967.", answer: true },
-                    { q: "He believed in a peaceful transition without revolution.", answer: false },
-                    { q: "The PFLP was known for plane hijackings.", answer: true },
-                    { q: "He led the PFLP until 2008.", answer: false },
-                    { q: "He died of an illness in 2008.", answer: true }
+                    { q: "He was a Christian doctor.", a: true },
+                    { q: "He founded the PFLP in 1967.", a: true },
+                    { q: "He believed in a secular, democratic state.", a: true },
+                    { q: "He opposed plane hijackings for the Palestinian cause.", a: false },
+                    { q: "He led the PFLP for many decades.", a: true },
+                    { q: "He was killed in a roadside gunfight.", a: false }
                 ]
             },
             "ho chi minh": {
-                text: "Ho Chi Minh founded the Communist Party of Vietnam. He led the fight for independence against France and the U.S. He was the first President of North Vietnam.",
+                text: "Ho Chi Minh founded the Communist Party of Vietnam and led the fight against France and the U.S. He was the first President of North Vietnam.",
                 questions: [
-                    { q: "Ho Chi Minh founded the Communist Party of Vietnam.", answer: true },
-                    { q: "He fought against both France and the United States.", answer: true },
-                    { q: "He became the President of a united Vietnam in 1945.", answer: false },
-                    { q: "He died before the Vietnam War ended.", answer: true },
-                    { q: "Saigon was renamed after him.", answer: true },
-                    { q: "He never traveled outside of Vietnam.", answer: false }
+                    { q: "He founded the Communist Party of Vietnam.", a: true },
+                    { q: "He fought for independence against French rule.", a: true },
+                    { q: "He later fought against the United States.", a: true },
+                    { q: "He lived to see the final end of the Vietnam War.", a: false },
+                    { q: "Saigon was renamed in his honor.", a: true },
+                    { q: "He was the first President of South Vietnam.", a: false }
                 ]
             },
             "huey p. newton": {
                 text: "Huey P. Newton co-founded the Black Panther Party in 1966. He advocated for Black self-defense and community programs. He was killed in 1989.",
                 questions: [
-                    { q: "Huey P. Newton co-founded the Black Panther Party.", answer: true },
-                    { q: "He was the party's Minister of Education.", answer: false },
-                    { q: "He believed in the right to bear arms for self-defense.", answer: true },
-                    { q: "The party provided free breakfast for children.", answer: true },
-                    { q: "He never went to prison.", answer: false },
-                    { q: "He earned a Ph.D. later in his life.", answer: true }
+                    { q: "He co-founded the Black Panther Party in 1966.", a: true },
+                    { q: "He was the party's Minister of Defense.", a: true },
+                    { q: "He was against Black people carrying arms for self-defense.", a: false },
+                    { q: "The party ran free breakfast programs for children.", a: true },
+                    { q: "He received a Ph.D. during his lifetime.", a: true },
+                    { q: "He died of natural causes in Oakland.", a: false }
                 ]
             },
             "leila khaled": {
-                text: "Leila Khaled is a member of the PFLP. She became famous for hijacking airplanes to draw attention to the Palestinian cause. She remains a significant political figure.",
+                text: "Leila Khaled is a member of the PFLP. She became famous for hijacking airplanes to draw international attention to the Palestinian cause. She remains a significant figure today.",
                 questions: [
-                    { q: "Leila Khaled is a member of the PFLP.", answer: true },
-                    { q: "She was involved in two airplane hijackings.", answer: true },
-                    { q: "She had surgery to change her appearance.", answer: true },
-                    { q: "She was executed after her second hijacking.", answer: false },
-                    { q: "She was released in a prisoner exchange.", answer: true },
-                    { q: "She no longer speaks about Palestinian rights.", answer: false }
+                    { q: "She is a member of the PFLP.", a: true },
+                    { q: "She became famous for hijacking airplanes.", a: true },
+                    { q: "She had plastic surgery to hide her appearance.", a: true },
+                    { q: "She was released in a prisoner exchange in 1970.", a: true },
+                    { q: "She was executed in 1970.", a: false },
+                    { q: "She no longer speaks about Palestinian rights.", a: false }
                 ]
             },
             "malcolm x": {
-                text: "Malcolm X was a Muslim minister and human rights activist. He initially advocated for Black nationalism but later focused on universal human rights after visiting Mecca. He was assassinated in 1965.",
+                text: "Malcolm X was a Muslim minister and activist. He initially advocated for Black independence and pride. After a trip to Mecca, he focused on universal human rights. He was killed in 1965.",
                 questions: [
-                    { q: "Malcolm X joined the Nation of Islam in prison.", answer: true },
-                    { q: "He always believed in non-violent protest only.", answer: false },
-                    { q: "His trip to Mecca changed his views on race.", answer: true },
-                    { q: "He founded the Black Panther Party.", answer: false },
-                    { q: "He left the Nation of Islam before his death.", answer: true },
-                    { q: "He was assassinated in New York.", answer: true }
+                    { q: "He joined the Nation of Islam while in prison.", a: true },
+                    { q: "He always agreed with Gandhi's non-violent stance.", a: false },
+                    { q: "A trip to Mecca changed his views on race.", a: true },
+                    { q: "He founded the Black Panther Party.", a: false },
+                    { q: "He left the Nation of Islam in 1964.", a: true },
+                    { q: "He was assassinated in New York in 1965.", a: true }
                 ]
             },
             "marwan barghouti": {
-                text: "Marwan Barghouti is a Palestinian leader currently in an Israeli prison. He was a key figure in the First and Second Intifadas. Many see him as a future leader.",
+                text: "Marwan Barghouti is a Palestinian leader in an Israeli prison. He played key roles in the First and Second Intifadas. He is a very popular figure among Palestinians.",
                 questions: [
-                    { q: "Marwan Barghouti was a leader in the Fatah movement.", answer: true },
-                    { q: "He was a key figure in both Intifadas.", answer: true },
-                    { q: "He has always opposed the peace process.", answer: false },
-                    { q: "He was arrested in 2002.", answer: true },
-                    { q: "He is currently a free man in Palestine.", answer: false },
-                    { q: "He is serving multiple life sentences.", answer: true }
+                    { q: "He was a key figure in the Fatah movement.", a: true },
+                    { q: "He led uprisings known as the Intifadas.", a: true },
+                    { q: "He was arrested by Israel in 2002.", a: true },
+                    { q: "He is currently a free man in the West Bank.", a: false },
+                    { q: "He is serving multiple life sentences.", a: true },
+                    { q: "He has no influence over modern Palestinians.", a: false }
                 ]
             },
             "mumia abu-jamal": {
-                text: "Mumia Abu-Jamal is a journalist and activist convicted of killing a police officer in 1981. He maintains his innocence. His death sentence was changed to life in prison.",
+                text: "Mumia Abu-Jamal is a journalist convicted of killing a police officer in 1981. He maintains his innocence. His death sentence was changed to life without parole.",
                 questions: [
-                    { q: "Mumia Abu-Jamal was a member of the Black Panther Party.", answer: true },
-                    { q: "He was convicted of killing a police officer in Philadelphia.", answer: true },
-                    { q: "He has admitted to the crime multiple times.", answer: false },
-                    { q: "He spent decades on death row.", answer: true },
-                    { q: "He is currently out of prison on parole.", answer: false },
-                    { q: "His case is seen as racially biased by many.", answer: true }
+                    { q: "He was once a member of the Black Panther Party.", a: true },
+                    { q: "He was convicted of murdering a police officer.", a: true },
+                    { q: "He has admitted guilt multiple times.", a: false },
+                    { q: "His death sentence was later commuted to life in prison.", a: true },
+                    { q: "He is currently out of prison on parole.", a: false },
+                    { q: "He continues to write and broadcast from prison.", a: true }
                 ]
             },
             "nelson mandela": {
-                text: "Nelson Mandela led the ANC against apartheid in South Africa. He spent 27 years in prison and became the first democratically elected President of South Africa in 1994.",
+                text: "Nelson Mandela led the ANC against apartheid. He spent 27 years in prison and became the first democratically elected President of South Africa in 1994. He won the Nobel Peace Prize.",
                 questions: [
-                    { q: "Nelson Mandela was a lawyer.", answer: true },
-                    { q: "He always used non-violent methods throughout his life.", answer: false },
-                    { q: "He spent 27 years in prison.", answer: true },
-                    { q: "He was released from prison in 1990.", answer: true },
-                    { q: "He won the Nobel Peace Prize in 1993.", answer: true },
-                    { q: "He was the first President of South Africa.", answer: false }
+                    { q: "He fought against the system called apartheid.", a: true },
+                    { q: "He was a member of the African National Congress (ANC).", a: true },
+                    { q: "He spent 27 years in prison.", a: true },
+                    { q: "He became the President of South Africa in 1990.", a: false },
+                    { q: "He won the Nobel Peace Prize in 1993.", a: true },
+                    { q: "He was the first non-white President of South Africa.", a: true }
                 ]
             },
             "omar mukhtar": {
-                text: "Omar Mukhtar led the Libyan resistance against Italian colonization for 20 years. He used guerrilla warfare and was executed by the Italians in 1931.",
+                text: "Omar Mukhtar led the Libyan resistance against Italian rule for 20 years. He used guerrilla warfare and was executed by the Italians in 1931.",
                 questions: [
-                    { q: "Omar Mukhtar was a religious teacher.", answer: true },
-                    { q: "He fought against the French colonization of Libya.", answer: false },
-                    { q: "He led guerrilla forces for almost 20 years.", answer: true },
-                    { q: "The Italians captured and executed him in 1931.", answer: true },
-                    { q: "His resistance was short-lived and unsuccessful.", answer: false },
-                    { q: "He is a national hero in Libya.", answer: true }
+                    { q: "He was a religious teacher and leader in Libya.", a: true },
+                    { q: "He led resistance against Italian colonization.", a: true },
+                    { q: "His struggle against the Italians lasted for 20 years.", a: true },
+                    { q: "The Italians captured him and set him free.", a: false },
+                    { q: "He was publicly executed in 1931.", a: true },
+                    { q: "He is a national hero in Libya.", a: true }
                 ]
             },
             "patrice lumumba": {
                 text: "Patrice Lumumba was the first Prime Minister of the independent Congo. He was removed in a coup and killed in 1961. He is a symbol of African independence.",
                 questions: [
-                    { q: "Lumumba helped create the MNC political party.", answer: true },
-                    { q: "He was the first President of the Congo.", answer: false },
-                    { q: "He sought help from the Soviet Union.", answer: true },
-                    { q: "He was in office for ten years.", answer: false },
-                    { q: "He was removed from power in a coup.", answer: true },
-                    { q: "He was killed in 1961.", answer: true }
+                    { q: "He helped create the MNC political party.", a: true },
+                    { q: "He was the first Prime Minister of the Congo.", a: true },
+                    { q: "He asked the Soviet Union for help during a revolt.", a: true },
+                    { q: "He served as Prime Minister for twenty years.", a: false },
+                    { q: "He was removed from power in a coup.", a: true },
+                    { q: "He was killed in 1961.", a: true }
                 ]
             },
             "rosa parks": {
-                text: "Rosa Parks triggered the Montgomery Bus Boycott by refusing to give up her seat. This was a turning point in the U.S. Civil Rights Movement.",
+                text: "Rosa Parks triggered the Montgomery Bus Boycott in 1955. Her refusal to move for a white passenger was a turning point in the Civil Rights Movement.",
                 questions: [
-                    { q: "Rosa Parks was a seamstress.", answer: true },
-                    { q: "She refused to give up her seat in 1955.", answer: true },
-                    { q: "The resulting bus boycott lasted for one month.", answer: false },
-                    { q: "The Supreme Court eventually ruled bus segregation was unconstitutional.", answer: true },
-                    { q: "She was a member of the NAACP.", answer: true },
-                    { q: "She spent the rest of her life in Alabama.", answer: false }
+                    { q: "She was a seamstress in Alabama.", a: true },
+                    { q: "She refused to give up her seat in 1955.", a: true },
+                    { q: "The resulting bus boycott lasted for only 10 days.", a: false },
+                    { q: "The Supreme Court ruled bus segregation unconstitutional.", a: true },
+                    { q: "She was a member of the NAACP.", a: true },
+                    { q: "She received the Congressional Gold Medal.", a: true }
                 ]
             },
             "samora machel": {
-                text: "Samora Machel was the first President of independent Mozambique. He led FRELIMO in a guerrilla war against Portugal. He died in a plane crash in 1986.",
+                text: "Samora Machel was the first President of independent Mozambique. He led FRELIMO against Portuguese rule and established a socialist government. He died in a plane crash in 1986.",
                 questions: [
-                    { q: "Samora Machel was a revolutionary leader in Mozambique.", answer: true },
-                    { q: "He led the FRELIMO army.", answer: true },
-                    { q: "Mozambique gained independence from Spain in 1975.", answer: false },
-                    { q: "He established a socialist government.", answer: true },
-                    { q: "He died of old age.", answer: false },
-                    { q: "He died in a mysterious plane crash in 1986.", answer: true }
+                    { q: "He was a leader in the FRELIMO party.", a: true },
+                    { q: "Mozambique fought for independence from Portugal.", a: true },
+                    { q: "He became the first President of Mozambique in 1975.", a: true },
+                    { q: "He supported a capitalist government.", a: false },
+                    { q: "He died of a natural illness in 1986.", a: false },
+                    { q: "He died in a mysterious plane crash.", a: true }
                 ]
             },
             "steve biko": {
-                text: "Steve Biko founded the Black Consciousness Movement in South Africa. He died from injuries while in police custody in 1977.",
+                text: "Steve Biko founded the Black Consciousness Movement in South Africa. He promoted Black pride and died from injuries while in police custody in 1977.",
                 questions: [
-                    { q: "Steve Biko founded the Black Consciousness Movement.", answer: true },
-                    { q: "He believed Black people should reject feelings of inferiority.", answer: true },
-                    { q: "He was allowed to participate in politics until his death.", answer: false },
-                    { q: "He died from injuries sustained in police custody.", answer: true },
-                    { q: "He was born in 1946.", answer: true },
-                    { q: "His death went unnoticed by the international community.", answer: false }
+                    { q: "He founded the Black Consciousness Movement.", a: true },
+                    { q: "He believed Black people were naturally inferior.", a: false },
+                    { q: "The white government banned him from political activity.", a: true },
+                    { q: "He was arrested and beaten by security police.", a: true },
+                    { q: "He died of natural causes in his home.", a: false },
+                    { q: "His death caused an international outcry.", a: true }
                 ]
             },
             "subcomandante marcos": {
-                text: "Subcomandante Marcos was the spokesperson for the Zapatista (EZLN) in Mexico. He led an uprising in 1994 against NAFTA and for indigenous rights.",
+                text: "Subcomandante Marcos was the spokesperson for the EZLN in Mexico. He led an uprising in 1994 for indigenous rights. He is a symbol of anti-globalization.",
                 questions: [
-                    { q: "Marcos was a leader of the EZLN in Mexico.", answer: true },
-                    { q: "The Zapatista uprising began in 1994.", answer: true },
-                    { q: "He was known for always wearing a ski mask.", answer: true },
-                    { q: "The EZLN only used armed fighting to achieve its goals.", answer: false },
-                    { q: "He changed his name to Subcomandante Galeano in 2014.", answer: true },
-                    { q: "He is a symbol of anti-globalization.", answer: true }
+                    { q: "He was a spokesperson for the Zapatista (EZLN).", a: true },
+                    { q: "The Zapatista uprising began in 1994.", a: true },
+                    { q: "He was known for wearing a ski mask.", a: true },
+                    { q: "He only used violent warfare to achieve his goals.", a: false },
+                    { q: "He changed his name to Subcomandante Galeano in 2014.", a: true },
+                    { q: "The EZLN is based in the state of Chiapas.", a: true }
                 ]
             },
             "thomas sankara": {
-                text: "Thomas Sankara was the President of Burkina Faso. He renamed the country and promoted radical social reforms, including women's rights. He was killed in a coup in 1987.",
+                text: "Thomas Sankara was the President of Burkina Faso. He promoted social reforms and women's rights. He was killed in a coup in 1987.",
                 questions: [
-                    { q: "Sankara renamed Upper Volta to Burkina Faso.", answer: true },
-                    { q: "Burkina Faso means 'Land of Incorruptible People'.", answer: true },
-                    { q: "He focused on helping the rich and powerful.", answer: false },
-                    { q: "He promoted women's rights.", answer: true },
-                    { q: "He was killed by his close friend in a coup.", answer: true },
-                    { q: "He ruled for 20 years.", answer: false }
+                    { q: "He was the President of Burkina Faso.", a: true },
+                    { q: "He renamed the country Upper Volta.", a: false },
+                    { q: "He focused on improving education and land for farmers.", a: true },
+                    { q: "He was a strong supporter of women's rights.", a: true },
+                    { q: "He ruled for four years.", a: true },
+                    { q: "He was killed in a coup in 1987.", a: true }
                 ]
             },
             "yasser arafat": {
                 text: "Yasser Arafat was the leader of the PLO. He signed the Oslo Accords and won the Nobel Peace Prize. He was the first President of the Palestinian Authority.",
                 questions: [
-                    { q: "Arafat was the founder of Fatah.", answer: true },
-                    { q: "He never gave a speech at the United Nations.", answer: false },
-                    { q: "He signed the Oslo Accords in 1993.", answer: true },
-                    { q: "He won the Nobel Peace Prize in 1994.", answer: true },
-                    { q: "He was the first President of the Palestinian Authority.", answer: true },
-                    { q: "He died in Ramallah.", answer: false }
+                    { q: "He was the leader of the PLO.", a: true },
+                    { q: "He gave a famous speech at the UN in 1974.", a: true },
+                    { q: "He refused to sign the Oslo Accords.", a: false },
+                    { q: "He won the Nobel Peace Prize in 1994.", a: true },
+                    { q: "He was the first President of the Palestinian Authority.", a: true },
+                    { q: "He died in Ramallah in 2004.", a: false }
                 ]
             }
         };
@@ -417,6 +418,7 @@
                     let name = file.name.toLowerCase();
                     if (!name.endsWith(".mp3") && !name.endsWith(".wav")) return;
                     
+                    // KEEP ORIGINAL FILENAME LOGIC (including special characters)
                     let baseName = name.replace(/\.(mp3|wav)$/, "").replace(/ female| male| uk| us| bio/gi, "").trim();
                     if (!people[baseName]) people[baseName] = { name: baseName, audios: [] };
                     people[baseName].audios.push(file.name);
@@ -442,7 +444,7 @@
                         ${usF ? `<button class="play-btn btn-us-female" onclick="play('${usF}')">🇺🇸 2. Listen (US Female)</button>` : ''}
                         ${usM ? `<button class="play-btn btn-read-up" onclick="triggerReadUp('${p.name}', '${usM}')">📖 3. Read Up (US Male)</button>` : ''}
                     </div>
-                    <div id="readup-${p.name.replace(/\s+/g, '-')}" class="read-up-content">
+                    <div id="readup-${p.name.replace(/[^\w\s-]/g, '').replace(/\s+/g, '-')}" class="read-up-content">
                         <div class="bio-text"></div>
                         <div class="quiz-container"></div>
                     </div>
@@ -452,13 +454,14 @@
 
         function triggerReadUp(name, audio) {
             play(audio);
-            const safeId = name.replace(/\s+/g, '-');
+            // Handling the matching of name with special chars to the text object
+            const safeId = name.replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
             const container = document.getElementById(`readup-${safeId}`);
-            const data = fightersTextData[name.toLowerCase()];
+            const data = fightersData[name.toLowerCase()];
             
-            if (data) {
+            if (data && container) {
                 container.querySelector('.bio-text').innerText = data.text;
-                let quizHTML = `<h3>Quick Check: True or False</h3>`;
+                let quizHTML = `<h3>True or False Quiz</h3>`;
                 data.questions.forEach((q, i) => {
                     quizHTML += `
                         <div class="q-block">
